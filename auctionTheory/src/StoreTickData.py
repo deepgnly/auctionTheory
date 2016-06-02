@@ -1,3 +1,4 @@
+from collections import OrderedDict
 class StoreTickData(object):
 
     scripName=None
@@ -22,6 +23,7 @@ class StoreTickData(object):
 
     def _isAlphabetAlreadyIncludedInTheTick(self,price,timeframeAlphabet):
 
+
         if price not in self.priceToAlphabetsDict:
             self.priceToAlphabetsDict[price]=[timeframeAlphabet]
             return False
@@ -35,11 +37,13 @@ class StoreTickData(object):
                 self.priceToAlphabetsDict[price] = timeframeAlphabetsList
                 return False
 
+
     def _get_sec(self,s):
         l = s.split(':')
         return int(l[0]) * 3600 + int(l[1]) * 60 + int(l[2])
 
     def _findCorrespondingAlphabetForGivenTime(self,timeInSeconds,timeFrameToAlphabetList):
+        timeFrameToAlphabetList=OrderedDict(sorted(timeFrameToAlphabetList.items(), key=lambda t: t[1]))
         for key in timeFrameToAlphabetList:
             intKey=int(key)
             val=timeFrameToAlphabetList[key]
@@ -70,7 +74,12 @@ class StoreTickData(object):
 
 if __name__ == '__main__':
     obj=StoreTickData("nifty","9:15:00","15:30:00",["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"],30,True)
-    obj.execute(121,3000)
+    obj.execute(121,34300)
+    obj.execute(121,34300)
+    obj.execute(122,34600)
+    obj.execute(121,35300)
+    obj.execute(124,50000)
+    print obj.priceToAlphabetsDict
 
 
 
