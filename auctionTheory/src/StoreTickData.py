@@ -1,5 +1,14 @@
 from collections import OrderedDict
 import time
+
+def load_src(name, fpath):
+    import os, imp
+    p=os.path.dirname(os.path.dirname(__file__))+fpath
+    load= imp.load_source(name, p)
+    return load
+
+moduleGraph = load_src("PlotMP", "/src/graph/PlotMP.py")
+
 class StoreTickData(object):
 
     scripName=None
@@ -10,8 +19,9 @@ class StoreTickData(object):
     profileAlphabetsArray=None
     timeFrame=None
     doStoreOnlyInHeap=None
+    plotObj=None
 
-    def __init__(self,scripName,marketStartTime,marketEndTime,profileAlphabetsArray,timeFrame,doStoreOnlyInHeap):
+    def __init__(self,scripName,marketStartTime,marketEndTime,profileAlphabetsArray,timeFrame,doStoreOnlyInHeap,currentDay,maxX,minX,maxY,minY):
 
         self.scripName=scripName
         self.startTime=marketStartTime
@@ -20,6 +30,7 @@ class StoreTickData(object):
         self.timeFrame=timeFrame
         self.doStoreOnlyInHeap=doStoreOnlyInHeap
         self._mapTimePeriodsToAlphabets(self.timeFrame,self.profileAlphabetsArray,self.startTime,self.endTime)
+        self.plotObj=moduleGraph.PlotMP(scripName,currentDay,maxX,minX,maxY,minY)
 
 
     def _isAlphabetAlreadyIncludedInTheTick(self,price,timeframeAlphabet):
@@ -28,6 +39,7 @@ class StoreTickData(object):
         if price not in self.priceToAlphabetsDict:
             self.priceToAlphabetsDict[price]=[timeframeAlphabet]
             print self.priceToAlphabetsDict
+            self.callPlot(self.priceToAlphabetsDict)
             return False
         else:
             timeframeAlphabetsList=self.priceToAlphabetsDict[price]
@@ -38,6 +50,7 @@ class StoreTickData(object):
                 timeframeAlphabetsList.append(timeframeAlphabet)
                 self.priceToAlphabetsDict[price] = timeframeAlphabetsList
                 print self.priceToAlphabetsDict
+                self.callPlot(self.priceToAlphabetsDict)
                 return False
 
 
@@ -82,10 +95,13 @@ class StoreTickData(object):
         if self.doStoreOnlyInHeap == True:
             self._isAlphabetAlreadyIncludedInTheTick(price, correcpondingAlphabet)
 
+    def callPlot(self,priceToAlphabetDictionary):
+        self.plotObj.udpateDataForPlot(priceToAlphabetDictionary)
+
 
 
 if __name__ == '__main__':
-    obj=StoreTickData("nifty","9:15:00","15:30:00",["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"],30,True)
+    obj=StoreTickData("nifty","9:15:00","15:30:00",["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"],30,True,)
     obj.execute(121,33300)
     obj.executeWithPriceOnly(121)
     obj.executeWithPriceOnly(122)
