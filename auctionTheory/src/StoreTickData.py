@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import time
 class StoreTickData(object):
 
     scripName=None
@@ -26,6 +27,7 @@ class StoreTickData(object):
 
         if price not in self.priceToAlphabetsDict:
             self.priceToAlphabetsDict[price]=[timeframeAlphabet]
+            print self.priceToAlphabetsDict
             return False
         else:
             timeframeAlphabetsList=self.priceToAlphabetsDict[price]
@@ -35,6 +37,7 @@ class StoreTickData(object):
             else:
                 timeframeAlphabetsList.append(timeframeAlphabet)
                 self.priceToAlphabetsDict[price] = timeframeAlphabetsList
+                print self.priceToAlphabetsDict
                 return False
 
 
@@ -44,12 +47,13 @@ class StoreTickData(object):
 
     def _findCorrespondingAlphabetForGivenTime(self,timeInSeconds,timeFrameToAlphabetList):
         timeFrameToAlphabetList=OrderedDict(sorted(timeFrameToAlphabetList.items(), key=lambda t: t[1]))
+        previousKey=None
         for key in timeFrameToAlphabetList:
             intKey=int(key)
-            val=timeFrameToAlphabetList[key]
             intTimeInSeconds=int(timeInSeconds)
             if intKey > intTimeInSeconds:
-                return val
+                return timeFrameToAlphabetList[previousKey]
+            previousKey=intKey
 
 
 
@@ -71,14 +75,22 @@ class StoreTickData(object):
         if self.doStoreOnlyInHeap==True:
             self._isAlphabetAlreadyIncludedInTheTick(price,correcpondingAlphabet)
 
+    def executeWithPriceOnly(self, price):
+        currenTime=time.strftime("%H:%M:%S")
+        timeInSeconds=self._get_sec(currenTime)
+        correcpondingAlphabet = self._findCorrespondingAlphabetForGivenTime(timeInSeconds, self.timeFrameToAlphabetList)
+        if self.doStoreOnlyInHeap == True:
+            self._isAlphabetAlreadyIncludedInTheTick(price, correcpondingAlphabet)
+
+
 
 if __name__ == '__main__':
     obj=StoreTickData("nifty","9:15:00","15:30:00",["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"],30,True)
-    obj.execute(121,34300)
-    obj.execute(121,34300)
-    obj.execute(122,34600)
-    obj.execute(121,35300)
-    obj.execute(124,50000)
+    obj.execute(121,33300)
+    obj.executeWithPriceOnly(121)
+    obj.executeWithPriceOnly(122)
+    obj.executeWithPriceOnly(121)
+    obj.executeWithPriceOnly(124)
     print obj.priceToAlphabetsDict
 
 
