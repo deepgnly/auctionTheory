@@ -13,6 +13,7 @@ class StoreTickData(object):
 
     scripName=None
     priceToAlphabetsDict={}
+    alphabetToPriceDict={}
     timeFrameToAlphabetList={}
     startTime=None
     endTime=None
@@ -31,6 +32,22 @@ class StoreTickData(object):
         self.doStoreOnlyInHeap=doStoreOnlyInHeap
         self._mapTimePeriodsToAlphabets(self.timeFrame,self.profileAlphabetsArray,self.startTime,self.endTime)
         self.plotObj=moduleGraph.PlotMP(scripName,currentDay,maxX,minX,maxY,minY)
+
+    def _transformAlphabetToPrice(self,priceToAlphabetsDictLoc):
+        alphabetToPriceDict={}
+        for price in priceToAlphabetsDictLoc:
+            alphabetList=priceToAlphabetsDictLoc[price]
+            for alphabet in alphabetList:
+                if alphabet in alphabetToPriceDict:
+                    priceList=alphabetToPriceDict[alphabet]
+                    priceList.append(price)
+                    priceList.sort()
+                    alphabetToPriceDict[alphabet]=priceList
+                else:
+                    alphabetToPriceDict[alphabet]=[price]
+        self.alphabetToPriceDict=alphabetToPriceDict
+        return alphabetToPriceDict
+
 
 
     def _isAlphabetAlreadyIncludedInTheTick(self,price,timeframeAlphabet):
